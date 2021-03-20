@@ -22,4 +22,11 @@ class AccessToken {
     }
 }
 
-export default AccessToken;
+const GrantTypes = {
+    ClientCredentials: 'client_credentials',
+    Password: 'password',
+    RefreshToken: 'refresh_token',
+    AuthorizationCode: 'authorization_code'
+};
+
+export { AccessToken, GrantTypes };
