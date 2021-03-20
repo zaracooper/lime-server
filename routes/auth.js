@@ -1,13 +1,13 @@
 import { Router } from 'express';
 
-import { AccessToken, GrantTypes } from '../helpers/token.js';
+import AccessToken from '../helpers/token.js';
 import { makeAuthRequest } from '../helpers/request.js';
 
 var router = Router();
 
 router.post('/token', (req, res, next) => {
     function getNewToken() {
-        makeAuthRequest('post', '/oauth/token', GrantTypes.ClientCredentials, req, res);
+        makeAuthRequest('post', '/oauth/token', req.body.grantType, req, res);
     }
 
     if (req.session.accessToken) {
