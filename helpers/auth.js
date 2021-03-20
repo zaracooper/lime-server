@@ -1,6 +1,3 @@
-import axios from 'axios';
-import { commerceLayer } from '../config/index.js';
-
 function checkAccessToken(req, res, next) {
     if (req.session.accessToken) {
         next();
