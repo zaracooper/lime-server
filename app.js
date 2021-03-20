@@ -5,7 +5,7 @@ import session from 'express-session';
 import store from 'connect-mongo';
 
 import { sessionDB } from './config/index.js';
-import { accessChecker } from './utils/auth.js';
+import { checkAccessToken } from './helpers/auth.js';
 import authRouter from './routes/auth.js';
 import apiRouter from './routes/index.js';
 
@@ -23,7 +23,7 @@ app.use(session({
   }),
   secret: sessionDB.secret,
   cookie: {
-    maxAge: 24 * 60 * 60 * 1000
+    maxAge: 2 * 60 * 60 * 1000
   },
   name: 'lime.sid',
   resave: false,
@@ -31,7 +31,7 @@ app.use(session({
 }));
 
 app.use('/oauth', authRouter);
-app.use(accessChecker);
+app.use(checkAccessToken);
 app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
