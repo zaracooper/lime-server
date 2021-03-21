@@ -19,6 +19,7 @@ function makeAuthRequest(method, path, grantType, request, response) {
         request.session.accessToken = { ...res.data, last_saved: Date.now() };
         response.status(200).send({ message: 'Token successfully acquired' });
     }).catch((err) => {
+        console.log(err);
         processErrorResponse(err, response, 'Failed to get access token');
     });
 }
@@ -59,7 +60,7 @@ function makeAPIRequestWithBody(method, path, body, additionalHeaders, request, 
 
 function processErrorResponse(err, response, failureMessage) {
     if (err.response) {
-        response.status(err.response.status).send({ error: err.response.data.errors, message: failureMessage });
+        response.status(err.response.status).send({ error: err.response.data, message: failureMessage });
     } else {
         response.status(500).send({ error: err.message, message: failureMessage });
     }
