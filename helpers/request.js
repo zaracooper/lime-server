@@ -1,22 +1,43 @@
 import axios from 'axios';
 import { commerceLayer } from '../config/index.js';
+import { GrantTypes } from './token.js';
 
 function makeAuthRequest(method, path, grantType, request, response) {
+    let data = {
+        'grant_type': grantType,
+        'client_id': commerceLayer.clientId,
+        'scope': commerceLayer.euScope
+    };
+
+    switch (grantType) {
+        case GrantTypes.ClientCredentials:
+            break;
+        case GrantTypes.Password:
+            data['username'] = request.body.username;
+            data['password'] = request.body.password;
+            break;
+        default:
+            response.status(500).send({ message: 'Grant type is not valid.' });
+            return;
+    }
+
     axios({
         method: method,
         baseURL: commerceLayer.domain,
         url: path,
-        data: {
-            'grant_type': grantType,
-            'client_id': commerceLayer.clientId,
-            'scope': commerceLayer.euScope
-        },
+        data: data,
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
     }).then((res) => {
-        request.session.accessToken = { ...res.data, last_saved: Date.now() };
+        switch (grantType) {
+            case GrantTypes.ClientCredentials:
+                request.session.clientToken = { ...res.data, last_saved: Date.now() };
+            case GrantTypes.Password:
+                request.session.customerToken = { ...res.data, last_saved: Date.now() };
+        }
+
         response.status(200).send({ message: 'Token successfully acquired' });
     }).catch((err) => {
         console.log(err);
@@ -25,13 +46,15 @@ function makeAuthRequest(method, path, grantType, request, response) {
 }
 
 function makeBodilessAPIRequest(method, path, request, response, failureMessage) {
+    const token = request.session.customerToken ? request.session.customerToken : request.session.clientToken;
+
     axios({
         method: method,
         baseURL: commerceLayer.domain,
         url: path,
         headers: {
             'Accept': 'application/vnd.api+json',
-            'Authorization': `Bearer ${request.session.accessToken.access_token}`
+            'Authorization': `Bearer ${token.access_token}`
         }
     }).then((res) => {
         response.status(200).send(res.data.data);
@@ -41,13 +64,15 @@ function makeBodilessAPIRequest(method, path, request, response, failureMessage)
 }
 
 function makeAPIRequestWithBody(method, path, body, additionalHeaders, request, response, failureMessage) {
+    const token = request.session.customerToken ? request.session.customerToken : request.session.clientToken;
+
     axios({
         method: method,
         baseURL: commerceLayer.domain,
         url: path,
         headers: {
             'Accept': 'application/vnd.api+json',
-            'Authorization': `Bearer ${request.session.accessToken.access_token}`,
+            'Authorization': `Bearer ${token.access_token}`,
             ...additionalHeaders
         },
         data: body

@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 
+import { makeAuthRequest } from '../helpers/request.js';
+
 export default class AccessToken {
     value;
     type;
@@ -21,3 +23,20 @@ export default class AccessToken {
         return dayjs(this.lastSaved).add(this.expiresIn, 's').isAfter(dayjs());
     }
 }
+
+const GrantTypes = {
+    ClientCredentials: 'client_credentials',
+    Password: 'password',
+    RefreshToken: 'refresh_token',
+    AuthorizationCOde: 'authorization_code'
+};
+
+function isTokenCurrent(token) {
+    if (token) {
+        return (new AccessToken(token)).isValid();
+    }
+
+    return false;
+}
+
+export { isTokenCurrent, GrantTypes };
