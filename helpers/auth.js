@@ -1,5 +1,5 @@
 function checkAccessToken(req, res, next) {
-    if (req.session.clientToken | req.session.customerToken) {
+    if (req.session.clientToken || req.session.customerToken) {
         next();
     } else {
         res.status(401).send({ message: 'Authentication required to access this route.' });

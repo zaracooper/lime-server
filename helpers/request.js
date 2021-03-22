@@ -45,13 +45,14 @@ function makeAuthRequest(method, path, grantType, request, response) {
     });
 }
 
-function makeBodilessAPIRequest(method, path, request, response, failureMessage) {
-    const token = request.session.customerToken ? request.session.customerToken : request.session.clientToken;
+function makeBodilessAPIRequest(method, path, params, request, response, failureMessage) {
+    const token = request.session.customerToken || request.session.clientToken;
 
     axios({
         method: method,
         baseURL: commerceLayer.domain,
         url: path,
+        params: params,
         headers: {
             'Accept': 'application/vnd.api+json',
             'Authorization': `Bearer ${token.access_token}`
@@ -63,8 +64,8 @@ function makeBodilessAPIRequest(method, path, request, response, failureMessage)
     });
 }
 
-function makeAPIRequestWithBody(method, path, body, additionalHeaders, request, response, failureMessage) {
-    const token = request.session.customerToken ? request.session.customerToken : request.session.clientToken;
+function makeAPIRequestWithBody(method, path, params, body, additionalHeaders, request, response, failureMessage) {
+    const token = request.session.customerToken || request.session.clientToken;
 
     axios({
         method: method,
@@ -75,10 +76,12 @@ function makeAPIRequestWithBody(method, path, body, additionalHeaders, request, 
             'Authorization': `Bearer ${token.access_token}`,
             ...additionalHeaders
         },
+        params: params,
         data: body
     }).then((res) => {
         response.status(200).send(res.data.data);
     }).catch((err) => {
+        console.log(err);
         processErrorResponse(err, response, failureMessage);
     });
 }

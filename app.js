@@ -11,6 +11,7 @@ import apiRouter from './routes/index.js';
 
 var app = express();
 
+app.set('query parser', 'simple');
 app.use(logger('dev'));
 app.use(json());
 app.use(urlencoded({ extended: false }));

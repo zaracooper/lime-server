@@ -8,6 +8,7 @@ router.post('/', (req, res, next) => {
     makeAPIRequestWithBody(
         'post',
         '/api/customers',
+        {},
         {
             'data': {
                 'type': 'customers',
@@ -31,6 +32,7 @@ router.get('/:id', (req, res, next) => {
     makeBodilessAPIRequest(
         'get',
         `/api/customers/${req.params.id}`,
+        {},
         req,
         res,
         'Failed to get customer');
@@ -40,6 +42,7 @@ router.delete('/:id', (req, res, next) => {
     makeBodilessAPIRequest(
         'delete',
         `/api/customers/${req.params.id}`,
+        {},
         req,
         res,
         'Failed to delete customer');
