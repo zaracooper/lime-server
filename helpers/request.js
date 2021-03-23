@@ -1,8 +1,9 @@
 import axios from 'axios';
+import qs from 'qs';
 import { commerceLayer } from '../config/index.js';
 import { GrantTypes } from './token.js';
 
-function makeAuthRequest(method, path, grantType, request, response) {
+function makeAuthRequest(grantType, request, response) {
     let data = {
         'grant_type': grantType,
         'client_id': commerceLayer.clientId,
@@ -22,9 +23,9 @@ function makeAuthRequest(method, path, grantType, request, response) {
     }
 
     axios({
-        method: method,
+        method: 'post',
         baseURL: commerceLayer.domain,
-        url: path,
+        url: '/auth/token',
         data: data,
         headers: {
             'Accept': 'application/json',
@@ -40,7 +41,6 @@ function makeAuthRequest(method, path, grantType, request, response) {
 
         response.status(200).send({ message: 'Token successfully acquired' });
     }).catch((err) => {
-        console.log(err);
         processErrorResponse(err, response, 'Failed to get access token');
     });
 }
@@ -53,6 +53,9 @@ function makeBodilessAPIRequest(method, path, params, request, response, failure
         baseURL: commerceLayer.domain,
         url: path,
         params: params,
+        paramsSerializer: function (params) {
+            return qs.stringify(params, { arrayFormat: 'comma' })
+        },
         headers: {
             'Accept': 'application/vnd.api+json',
             'Authorization': `Bearer ${token.access_token}`
@@ -77,11 +80,13 @@ function makeAPIRequestWithBody(method, path, params, body, additionalHeaders, r
             ...additionalHeaders
         },
         params: params,
+        paramsSerializer: function (params) {
+            return qs.stringify(params, { arrayFormat: 'comma' })
+        },
         data: body
     }).then((res) => {
         response.status(200).send(res.data.data);
     }).catch((err) => {
-        console.log(err);
         processErrorResponse(err, response, failureMessage);
     });
 }

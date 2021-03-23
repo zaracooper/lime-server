@@ -1,16 +1,32 @@
 import { Router } from 'express';
 
-import { isTokenCurrent } from '../helpers/token.js';
+import { GrantTypes, isTokenCurrent } from '../helpers/token.js';
 import { makeAuthRequest } from '../helpers/request.js';
 
 var router = Router();
 
 router.post('/token', (req, res, next) => {
-    if (isTokenCurrent(req.session.customerToken) | isTokenCurrent(req.session.clientToken)) {
-        res.send({ message: 'Issued access token is still valid' }).status(304);
-    } else {
-        makeAuthRequest('post', '/oauth/token', req.body.grantType, req, res);
+    const grantType = req.body.grantType;
+
+    function checkToken(token) {
+        if (isTokenCurrent(token)) {
+            res.send({ message: 'Issued access token is still valid' }).status(304);
+        } else {
+            makeAuthRequest(grantType, req, res);
+        }
     }
+
+    switch (grantType) {
+        case GrantTypes.Password:
+            checkToken(req.session.customerToken);
+            break;
+        case GrantTypes.ClientCredentials:
+            checkToken(req.session.clientToken);
+            break;
+        default:
+            makeAuthRequest(grantType, req, res);
+    }
+
 });
 
 export default router;
